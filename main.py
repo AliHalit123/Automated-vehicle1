@@ -69,7 +69,7 @@ buttons = [
 
 running = True
 while running:
-    clock.tick(2)  # Her şey daha yavaş hareket etsin
+    clock.tick(2)
     screen.fill(WHITE)
 
     for event in pygame.event.get():
@@ -81,7 +81,7 @@ while running:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
-            if y < HEIGHT:  # Grid alanına tıklama
+            if y < HEIGHT:
                 row, col = y // CELL_SIZE, x // CELL_SIZE
                 cell = grid[row][col]
 
@@ -120,7 +120,7 @@ while running:
 
     if mode:
         font = pygame.font.SysFont(None, 28)
-        info_text = f"Mod: {mode} - Grid'e tıklayın"
+        info_text = f"Mode: {mode} - click any position to set"
         info_surface = font.render(info_text, True, (0, 0, 0))
         screen.blit(info_surface, (10, HEIGHT - 30))
 

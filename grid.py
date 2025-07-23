@@ -19,14 +19,14 @@ class Cell:
             "wall": ["assets/wall.png"],
             "goal": ["destination.jpg"],
             "start": ["starting_point.jpg"],
-            "building": ["building.gif","building5.gif","building2.gif","building1.gif"],
+            "building": ["building.gif","building1.jpg","building5.gif","building2.gif","building1.gif"],
         }
 
         image_path = random.choice(path_map[self.type])
 
 
         if not image_path:
-            return None  # Görsel tanımlı değilse hiç yükleme
+            return None
 
         try:
             img = pygame.image.load(image_path)
@@ -34,7 +34,7 @@ class Cell:
         except Exception as e:
             print(f"Resim yüklenemedi: {image_path}, Hata: {e}")
             surf = pygame.Surface((size, size))
-            surf.fill((200, 200, 200))  # Gri yüzey
+            surf.fill((200, 200, 200))
             return surf
 
     def set_type(self, new_type):

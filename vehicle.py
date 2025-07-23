@@ -42,7 +42,7 @@ class Vehicle:
             if 0 <= r < 10 and 0 <= c < 10:
                 sub_surface = screen.subsurface(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE).copy()
                 if contains_human(sub_surface):
-                    print("insan")
+                    print(f"insan {r},{c} noktasında")
                     return True
         return False
 
@@ -67,5 +67,5 @@ class Vehicle:
 
     def draw(self, surface):
         rotated = pygame.transform.rotate(self.original_image, self.angle)
-        rect = rotated.get_rect(center=(self.pos[1]*CELL_SIZE + CELL_SIZE//2, self.pos[0]*CELL_SIZE + CELL_SIZE//2))
-        surface.blit(rotated, rect.topleft)
+        #rect = rotated.get_rect(center=(self.pos[1]*CELL_SIZE + CELL_SIZE//2, self.pos[0]*CELL_SIZE + CELL_SIZE//2))
+        surface.blit(rotated, (self.pos[1]*CELL_SIZE, self.pos[0]*CELL_SIZE))

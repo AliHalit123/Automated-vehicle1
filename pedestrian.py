@@ -13,14 +13,13 @@ class PedestrianManager:
                 "yaya.jpg", "asian.jpg", "yaya5.png", "wheelchair.jpg", "human.png","black.png","black1.png"
             ])
             self.positions.append((pos[0], pos[1], image_path))
-            self.directions.append(random.choice(DIRECTIONS))  # Başlangıç yönü
-
+            self.directions.append(random.choice(DIRECTIONS))
     def move_pedestrians(self, grid_matrix, car_pos):
         new_positions = []
         new_directions = []
 
         occupied_positions = {(p[0], p[1]) for p in self.positions}
-        occupied_positions.add(car_pos)  # Aracın olduğu yer de yasak
+        occupied_positions.add(car_pos)
 
         for idx, (r, c, img_path) in enumerate(self.positions):
             grid_matrix[r][c].set_type("empty")
