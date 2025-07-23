@@ -22,6 +22,8 @@ def contains_human(surface):
     results = model.predict(image, verbose=False)
     for r in results:
         for box in r.boxes:
+            conf = None
             if int(box.cls[0]) == 0:  # class 0 = person
-                return True
+                conf = float(box.conf[0])
+                return conf
     return False

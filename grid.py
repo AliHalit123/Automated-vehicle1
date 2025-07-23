@@ -5,7 +5,7 @@ class Cell:
     def __init__(self, row, col, cell_type="empty"):
         self.row = row
         self.col = col
-        self.type = cell_type  # "empty", "car", "pedestrian", "wall", "goal", "start", "building"
+        self.type = cell_type  # "empty", "car", "pedestrian", "goal", "start", "building"
         self.image = self.load_image() if self.should_have_image() else None
 
     def should_have_image(self):

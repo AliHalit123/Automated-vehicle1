@@ -9,7 +9,8 @@ class Vehicle:
         self.path = path  # [(x, y), (x, y), ...]
         self.step = 0
         self.angle = 0  # varsayılan açı
-
+        self.y_initial= 0
+        self.warnings=[]
         # Aracın orijinal görseli
         self.original_image = Cell(self.pos[0], self.pos[1], "car").image
 
@@ -42,7 +43,9 @@ class Vehicle:
             if 0 <= r < 10 and 0 <= c < 10:
                 sub_surface = screen.subsurface(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE).copy()
                 if contains_human(sub_surface):
-                    print(f"insan {r},{c} noktasında")
+                    self.warnings.append(
+                        f"--->insan görüldü {r},{c}  duruldu  with confidence level {round(contains_human(sub_surface), 2)}")
+
                     return True
         return False
 
@@ -66,6 +69,12 @@ class Vehicle:
             self.step += 1
 
     def draw(self, surface):
+        self.y_initial = 20
         rotated = pygame.transform.rotate(self.original_image, self.angle)
-        #rect = rotated.get_rect(center=(self.pos[1]*CELL_SIZE + CELL_SIZE//2, self.pos[0]*CELL_SIZE + CELL_SIZE//2))
+        #rect = rotated.get_rect( center=(self.pos[1] * CELL_SIZE + CELL_SIZE // 2, self.pos[0] * CELL_SIZE + CELL_SIZE // 2))
         surface.blit(rotated, (self.pos[1]*CELL_SIZE, self.pos[0]*CELL_SIZE))
+        font = pygame.font.SysFont(None, 24)
+        for sentence in self.warnings:
+            text = font.render(sentence, True, (0, 153, 153))
+            surface.blit(text, (800, self.y_initial))
+            self.y_initial = self.y_initial + 20
