@@ -1,70 +1,34 @@
 import pygame
-import random
 from settings import WIDTH, HEIGHT, CELL_SIZE, ROWS, COLS, WHITE
-from grid import Cell
-from astar import astar
-from vehicle import Vehicle
+from firstgrid import initialize_grid
 from pedestrian import PedestrianManager
+from garbage import Garbage
+from button import Button
+from game_state import GameState
+import callback
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT + 60))
-pygame.display.set_caption("Automated Vehicle Simulation")
+pygame.display.set_caption("Autonomous Vehicle Simulation")
 clock = pygame.time.Clock()
 
-grid = [[Cell(r, c) for c in range(COLS)] for r in range(ROWS)]
-
-
-building_positions = set()
-while len(building_positions) < 6:
-    pos = (random.randint(0, ROWS - 1), random.randint(0, COLS - 1))
-    if pos not in building_positions:
-        building_positions.add(pos)
-
-for (r, c) in building_positions:
-    grid[r][c].set_type("building")
-
-start = None
-end = None
-vehicle = None
+# Initial grid and other objects
+grid, building_positions = initialize_grid(ROWS, COLS)
 pedestrians = PedestrianManager()
-path = []
-mode = None
+garbage = Garbage()
 
+# Gamestate object
+state = GameState(grid, building_positions, pedestrians, garbage)
 
-class Button:
-    def __init__(self, x, y, w, h, text, callback):
-        self.rect = pygame.Rect(x, y, w, h)
-        self.text = text
-        self.callback = callback
-        self.font = pygame.font.SysFont(None, 24)
-
-    def draw(self, screen):
-        pygame.draw.rect(screen, (180, 180, 180), self.rect)
-        pygame.draw.rect(screen, (50, 50, 50), self.rect, 2)
-        txt = self.font.render(self.text, True, (0, 0, 0))
-        text_rect = txt.get_rect(center=self.rect.center)
-        screen.blit(txt, text_rect)
-
-    def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos):
-            self.callback()
-
-def set_start_mode():
-    global mode
-    mode = "start"
-
-def set_end_mode():
-    global mode
-    mode = "end"
-
-def set_pedestrian_mode():
-    global mode
-    mode = "pedestrian"
-
+#Buttons and callbacks
 buttons = [
-    Button(10, HEIGHT + 10, 120, 40, " Starting point ", set_start_mode),
-    Button(140, HEIGHT + 10, 120, 40, " Destination ", set_end_mode),
-    Button(270, HEIGHT + 10, 120, 40, " Pedestrian", set_pedestrian_mode)
+    Button(160, HEIGHT + 10, 120, 40, "Initial Position", lambda: callback.set_start_mode(state)),
+    Button(290, HEIGHT + 10, 120, 40, "Destination", lambda: callback.set_end_mode(state)),
+    Button(420, HEIGHT + 10, 120, 40, "Pedestrian", lambda: callback.set_pedestrian_mode(state)),
+    Button(710, 200, 120, 40, "Start", lambda: callback.set_start(state)),
+    Button(710, 260, 120, 40, "Restart", lambda: callback.restart_callback(state)),
+    Button(710, 320, 120, 40, "Clean", lambda: callback.clear_callback(state)),
+    Button(710, 380, 120, 40, "Rebuild", lambda: callback.rebuild(state))
 ]
 
 running = True
@@ -72,6 +36,7 @@ while running:
     clock.tick(2)
     screen.fill(WHITE)
 
+    #event loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -81,50 +46,83 @@ while running:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
-            if y < HEIGHT:
+            if y < HEIGHT and state.mode is not None:
                 row, col = y // CELL_SIZE, x // CELL_SIZE
-                cell = grid[row][col]
+                #add starting point
+                if state.mode == "start" and not state.start and state.grid[row][col].type == "empty":
+                    state.start = (row, col)
+                    state.grid[row][col].set_type("start")
+                    state.mode = None
+                #add destination
+                elif state.mode == "end" and state.grid[row][col].type == "empty":
+                    state.end_list.append((row, col))
+                    state.grid[row][col].set_type("goal")
+                    if not state.vehicle and state.start:
+                        from astar import astar
+                        path = astar(state.start, state.end_list[0], state.grid)
+                        destination_queue = state.end_list[1:] if len(state.end_list) > 1 else []
+                        from vehicle import Vehicle
+                        state.vehicle = Vehicle(state.start, path, destination_queue=destination_queue, initial_target=state.end_list[0])
+                        state.vehicle1 = Vehicle(state.start, path, destination_queue=destination_queue.copy(), initial_target=state.end_list[0], img_type="car1")
+                    elif state.vehicle:
+                        state.vehicle.destinations.append((row, col))
+                        state.vehicle1.destinations.append((row, col))
+                    state.mode = None
+                #add pedestrian
+                elif state.mode == "pedestrian" and state.grid[row][col].type == "empty":
+                    state.grid[row][col].set_type("pedestrian")
+                    state.pedestrians.add_pedestrian((row, col))
+                    state.mode = None
 
-                if mode == "start" and not start and cell.type == "empty":
-                    start = (row, col)
-                    cell.set_type("start")
-                    mode = None
 
-                elif mode == "end" and not end and cell.type == "empty":
-                    end = (row, col)
-                    cell.set_type("goal")
-                    path = astar(start, end, grid)
-                    vehicle = Vehicle(start, path)
-                    mode = None
+    state.garbage.add_garbage()
 
-                elif mode == "pedestrian" and cell.type == "empty":
-                    cell.set_type("pedestrian")
-                    pedestrians.add_pedestrian((row, col))
-                    mode = None
+    # move pedestrians and garbage
+    if state.vehicle and state.start_simulation and state.vehicle.pos != state.end_list[-1] and state.vehicle1.pos != state.end_list[-1]:
+        state.pedestrians.move_pedestrians(state.grid, state.vehicle.pos)
+        state.garbage.move_garbage(state.grid, state.vehicle.pos)
 
-    if vehicle:
-        pedestrians.move_pedestrians(grid, vehicle.pos)
+    # check if vehicles reached and save the time
+    if state.vehicle and state.vehicle.pos == state.end_list[-1] and not state.v_reached[0]:
+        state.v_reached[0] = True
+        import time
+        state.end_time_v1 = time.time()
+        with open("record.txt", "a") as f:
+            f.write(f"vehicle1:{round(state.end_time_v1 - state.start_time, 3)} ")
 
-    for row in grid:
+    if state.vehicle1 and state.vehicle1.pos == state.end_list[-1] and not state.v_reached[1]:
+        state.v_reached[1] = True
+        import time
+        state.end_time_v2 = time.time()
+        with open("record.txt", "a") as f:
+            f.write(f"vehicle2:{round(state.end_time_v2 - state.start_time, 3)} \n")
+
+    # sraw each cell on the grid
+    for row in state.grid:
         for cell in row:
             cell.draw(screen, CELL_SIZE)
 
-    pedestrians.draw(screen)
+    #draw pedestrians and garbage
+    state.pedestrians.draw(screen)
+    state.garbage.draw(screen)
 
-    if vehicle:
-        vehicle.move(screen)
-        vehicle.draw(screen)
+    #move and draw vehciles
+    if state.vehicle and state.start_simulation:
+        state.vehicle.move(screen, state.grid)
+        state.vehicle1.move_normal(screen, state.grid)
+        state.vehicle.draw(screen)
+        state.vehicle1.draw(screen, False)
 
+    #draw the buttons
     for button in buttons:
         button.draw(screen)
 
-    if mode:
+    if state.mode:
         font = pygame.font.SysFont(None, 28)
-        info_text = f"Mode: {mode} - click any position to set"
+        info_text = f"Click on any cell on the grid to set the location of {state.mode} point"
         info_surface = font.render(info_text, True, (0, 0, 0))
         screen.blit(info_surface, (10, HEIGHT - 30))
 
     pygame.display.update()
-
 
 pygame.quit()

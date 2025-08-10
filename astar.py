@@ -22,7 +22,7 @@ def astar(start, goal, grid_matrix):
 
             if 0 <= nx < ROWS and 0 <= ny < COLS:
                 neighbor_cell = grid_matrix[nx][ny]
-                if neighbor_cell.type not in ["wall", "building"]:
+                if neighbor_cell.type not in ["building"]:
                     new_cost = cost_so_far[current] + 1
                     if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
                         cost_so_far[neighbor] = new_cost

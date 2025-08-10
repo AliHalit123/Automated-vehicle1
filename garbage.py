@@ -2,31 +2,28 @@ import random
 import pygame
 from settings import ROWS, COLS, DIRECTIONS, CELL_SIZE
 
-class PedestrianManager:
-    """
-       Manages all pedestrians in the simulation, including their positions,
-       directions, movement logic, and rendering.
-       """
+class Garbage:
     def __init__(self):
         self.positions = []
         self.initial_positions = []
         self.directions = []
 
-    #add pedestrian at given position
-    def add_pedestrian(self, pos):
-        if not any(p[0] == pos[0] and p[1] == pos[1] for p in self.positions):
-            image_path = random.choice([
-                "images/yaya.png", "images/yaya1.jpg", "images/yaya2.jpg", "images/yaya5.png",
-            ])
-            self.positions.append((pos[0], pos[1], image_path))
-            self.initial_positions.append((pos[0], pos[1], image_path))
-            self.directions.append(random.choice(DIRECTIONS))
-    #reloacte for restart button
+    def add_garbage(self):
+        while len(self.positions) < 4:
+            pos = (random.randint(0, ROWS - 1), random.randint(0, COLS - 1))
+            if pos not in self.positions:
+                image_path = random.choice([
+                    "images/garbage.jpg","images/garbage2.gif"
+                ])
+                self.positions.append((pos[0], pos[1], image_path))
+                self.initial_positions.append((pos[0], pos[1], image_path))
+                self.directions.append(random.choice(DIRECTIONS))
+
     def reset_positions(self):
         self.positions = self.initial_positions.copy()
         self.directions = [random.choice(DIRECTIONS) for _ in self.positions]
 
-    def move_pedestrians(self, grid_matrix, car_pos):
+    def move_garbage(self, grid_matrix, car_pos):
         new_positions = []
         new_directions = []
 
@@ -59,7 +56,7 @@ class PedestrianManager:
                 occupied_positions.add((r, c))
 
         for r, c, _ in new_positions:
-            grid_matrix[r][c].set_type("pedestrian")
+            grid_matrix[r][c].set_type("garbage")
 
         self.positions = new_positions
         self.directions = new_directions

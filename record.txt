@@ -1,0 +1,42 @@
+Here we have map0, run 0, version 0
+vehicle1:6.649 vehicle2:6.649 
+Here we have map0, run 1, version 0
+vehicle1:12.653 vehicle2:12.653 
+Here we have map0, run 2, version 0
+vehicle1:22.575 vehicle2:22.575 
+Here we have map0, run 3, version 0
+vehicle1:29.083 vehicle2:29.083 
+Here we have map1, run 3, version 0
+vehicle1:2.999 vehicle2:2.999 
+Here we have map1, run 4, version 0
+vehicle1:7.504 vehicle2:7.504 
+Here we have map1, run 5, version 0
+vehicle1:14.378 vehicle2:14.378 
+Here we have map1, run 6, version 0
+Here we have map1, run 7, version 0
+vehicle1:22.889 Here we have map1, run 8, version 0
+Here we have map1, run 9, version 0
+vehicle1:109.176 Here we have map0, run 0, version 0
+vehicle1:5.659 vehicle2:5.659 
+Here we have map1, run 0, version 0
+vehicle1:4.506 Here we have map1, run 1, version 0
+vehicle1:13.974 vehicle2:13.974 
+Here we have map1, run 2, version 0
+vehicle1:18.479 vehicle2:18.479 
+Here we have map1, run 2, version 1
+vehicle1:30.733 vehicle2:30.733 
+Here we have map0, run 0, version 0
+Here we have map0, run 0, version 0
+Here we have map0, run 0, version 0
+vehicle1:2.53 vehicle2:2.53 
+Here we have map0, run 1, version 0
+vehicle1:14.064 vehicle2:14.064 
+Here we have map0, run 0, version 0
+vehicle1:5.922 Here we have map 0, run 0, version 0
+vehicle1:5.62 vehicle2:5.621 
+Here we have map 0, run 1, version 0
+vehicle1:14.18 vehicle2:14.181 
+Here we have map 1, run 0, version 0
+vehicle1:5.758 vehicle2:5.759 
+Here we have map 0, run 0, version 0
+vehicle1:6.049 vehicle2:6.05 

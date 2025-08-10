@@ -5,13 +5,13 @@ from ultralytics import YOLO
 
 model = YOLO("yolov8n.pt")
 
-def surface_to_numpy(surface):
+def surface_to_numpy(surface): #transform ths image to numpy array
 
     raw = pygame.image.tostring(surface, "RGB")
     image = np.frombuffer(raw, dtype=np.uint8).reshape((surface.get_height(), surface.get_width(), 3))
     return image
 
-def contains_human(surface):
+def contains_human(surface): #Check image if it contains human
 
 
     image = surface_to_numpy(surface)
@@ -23,7 +23,8 @@ def contains_human(surface):
     for r in results:
         for box in r.boxes:
             conf = None
-            if int(box.cls[0]) == 0:  # class 0 = person
+
+            if int(box.cls[0]) == 0:  #human id is 0
                 conf = float(box.conf[0])
                 return conf
     return False
